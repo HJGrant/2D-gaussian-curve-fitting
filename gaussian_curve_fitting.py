@@ -80,7 +80,6 @@ def display_3D_plot(arr):
     y = np.linspace(0, nrows, nrows)
     x, y = np.meshgrid(x, y)
 
-    # region = np.s_[5:50, 5:50]
     # x, y, z = x[region], y[region], z[region]
 
     # Set up plot
