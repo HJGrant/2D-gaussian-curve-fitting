@@ -204,6 +204,18 @@ def bhatta_dist(X1, X2, method='continuous'):
     else:
         return -np.log(bht)
 
+def euclidean_distance(arr1, arr2):
+    distances = []
+    print('calculating eucledian distance')
+
+    for j in range(arr1.shape[0]):
+        for i in range(arr2.shape[1]):
+            dist = np.sqrt(np.square(arr1[j][i] - arr2[j][i]))
+            distances.append(dist)
+
+    print(distances)
+    return np.mean(distances) 
+
 #a function for returning a set of tiles based on list of coordinates
 def get_tiles(img, coordinates):
     #takes in gray-scale image
@@ -346,10 +358,6 @@ def get_laser_tiles(data_path, fit):
         coordinates = get_coordinates(img)
 
 
-        # plt.imshow(img[:, :, 0], cmap='gray')
-        # plt.plot(coordinates[:, 1], coordinates[:, 0], 'g.')
-        # plt.show()
-
         #image_max = ndi.maximum_filter(img, size=20, mode='constant')
 
         #apply a filter to find all of the local maxima in an image and draw a red point on them 
@@ -399,12 +407,13 @@ def get_laser_tiles(data_path, fit):
             # if tile_params[4] < 200 or tile_params[4] > 265:
             #     continue
 
-            dist = bhatta_dist(fit.flatten(), tile_fit.flatten(), method='continuous') 
+            #dist = bhatta_dist(fit.flatten(), tile_fit.flatten(), method='continuous') 
+            dist = euclidean_distance(fit, tile_fit)
             # print(dist)
             #tile[tile<50] = 0
             print(tile_fit.shape)
             print(fit.shape)
-            display_tile(fit, tile_fit, str(f'Bhatta dist is: {dist}'))
+            display_tile(fit, tile_fit, str(f'Euclidean dist is: {dist}'))
             print(tile_params)
 
             point = coordinates[i]
@@ -456,7 +465,6 @@ def curve_fitting_2D(tile):
     #display_3D_plot(fit)
 
     return fit, popt
-
 
 #take in a list of tiles with lasers, and compute the fitted curve for each. Then compute the average of all the computed curves. 
 #return the gaussian parameters for plotting an ideal gaussian function. 
@@ -521,6 +529,7 @@ def get_ideal_gaussian_fit(tiles_list):
 warnings.filterwarnings('ignore')
 
 if __name__ == '__main__':
+    # initialize a meshgrid for displaying 
     x, y = np.linspace(-25, 25, 50), np.linspace(-25, 25, 50)
     X, Y = np.meshgrid(x, y)
 
@@ -534,8 +543,6 @@ if __name__ == '__main__':
     #this function is used when the position of the laser is known.
     #fit, popt = get_ideal_gaussian_fit(tiles_list)
 
-    # print('The final estimated parameters are: ')
-    # print(popt)
     # np.save('ideal_gaussian_fit', fit)
     fit = np.load('ideal_gaussian_fit.npy')
     display_3D_plot(fit)
@@ -543,15 +550,15 @@ if __name__ == '__main__':
     #random_tile = np.random.randn(tile.shape[0], tile.shape[1])
     random_tile = get_tiles(img_copy[:,:,0], [[234, 455]])
     random_tile = np.asarray(random_tile)
-    print(random_tile[0].shape)
+
     dist = bhatta_dist(fit.flatten(), random_tile[0].flatten(), method='continuous') 
-    #display_3D_plot(random_tile[0])
 
     print(f'Rondom tile distance is: {dist}')
 
     for tile in laser_tiles_list:
         #dist = distance.directed_hausdorff(fit, tile)
-        dist = bhatta_dist(fit.flatten(), tile.flatten(), method='continuous') 
+        #dist = bhatta_dist(fit.flatten(), tile.flatten(), method='continuous') 
+        dist = euclidean_distance(fit.flatten(), tile.flatten())
         print(dist)
         tile[tile<50] = 0
         display_tile(fit, tile, str(f'Bhatta dist is: {dist}'))
